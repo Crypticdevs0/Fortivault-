@@ -164,9 +164,7 @@ ${data.evidenceFiles.length > 0 ? data.evidenceFiles.map((f) => `- ${f.name}`).j
   const progress = ((currentStep + 1) / steps.length) * 100
 
   return (
-    <form name="fraud-report" data-netlify="true" onSubmit={handleSubmit} netlify-honeypot="bot-field">
-      <input type="hidden" name="bot-field" />
-      <input type="hidden" name="form-name" value="fraud-report" />
+    <form onSubmit={handleSubmit}>
 
       <Card className="w-full">
         <CardHeader>

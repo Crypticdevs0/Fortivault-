@@ -120,46 +120,84 @@ ${formData.message}
                   <CardTitle>Send us a Message</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form
-                    className="space-y-6"
-                    name="contact"
-                    method="POST"
-                    data-netlify="true"
-                    netlify-honeypot="bot-field"
-                  >
-                    <input type="hidden" name="bot-field" />
-                    <input type="hidden" name="form-name" value="contact" />
+                  <form className="space-y-6" onSubmit={handleSubmit}>
+                    {submitStatus === "success" && (
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-md">
+                        <p className="text-green-800 font-medium">Thank you! We've received your message and will get back to you soon.</p>
+                      </div>
+                    )}
+                    {submitStatus === "error" && (
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-red-800 font-medium">There was an error submitting your message. Please try again.</p>
+                      </div>
+                    )}
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="firstName" className="block text-sm font-medium mb-2">
                           First Name
                         </label>
-                        <Input id="firstName" name="firstName" placeholder="Enter your first name" required />
+                        <Input
+                          id="firstName"
+                          name="firstName"
+                          placeholder="Enter your first name"
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          required
+                        />
                       </div>
                       <div>
                         <label htmlFor="lastName" className="block text-sm font-medium mb-2">
                           Last Name
                         </label>
-                        <Input id="lastName" name="lastName" placeholder="Enter your last name" required />
+                        <Input
+                          id="lastName"
+                          name="lastName"
+                          placeholder="Enter your last name"
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          required
+                        />
                       </div>
                     </div>
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium mb-2">
                         Email Address
                       </label>
-                      <Input id="email" name="email" type="email" placeholder="Enter your email" required />
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                      />
                     </div>
                     <div>
                       <label htmlFor="phone" className="block text-sm font-medium mb-2">
                         Phone Number
                       </label>
-                      <Input id="phone" name="phone" type="tel" placeholder="Enter your phone number" />
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        placeholder="Enter your phone number"
+                        value={formData.phone}
+                        onChange={handleChange}
+                      />
                     </div>
                     <div>
                       <label htmlFor="subject" className="block text-sm font-medium mb-2">
                         Subject
                       </label>
-                      <Input id="subject" name="subject" placeholder="What can we help you with?" required />
+                      <Input
+                        id="subject"
+                        name="subject"
+                        placeholder="What can we help you with?"
+                        value={formData.subject}
+                        onChange={handleChange}
+                        required
+                      />
                     </div>
                     <div>
                       <label htmlFor="message" className="block text-sm font-medium mb-2">
@@ -170,11 +208,13 @@ ${formData.message}
                         name="message"
                         placeholder="Tell us about your situation..."
                         className="min-h-[120px]"
+                        value={formData.message}
+                        onChange={handleChange}
                         required
                       />
                     </div>
-                    <Button type="submit" className="w-full">
-                      Send Message
+                    <Button type="submit" className="w-full" disabled={isSubmitting}>
+                      {isSubmitting ? "Sending..." : "Send Message"}
                     </Button>
                   </form>
                 </CardContent>

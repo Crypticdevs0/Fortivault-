@@ -1,3 +1,6 @@
+"use client"
+
+import { useState, FormEvent } from "react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
@@ -6,7 +9,90 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail, Phone, MapPin, Clock } from "lucide-react"
 
+interface ContactFormData {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  subject: string
+  message: string
+}
+
 export default function ContactPage() {
+  const [formData, setFormData] = useState<ContactFormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus("idle")
+
+    const form = new FormData()
+    form.append("access_key", "8b7b966f-b99c-44bd-ae50-fee2a626402f")
+    form.append("subject", "New Contact Form Submission - " + formData.subject)
+    form.append("from_name", `${formData.firstName} ${formData.lastName}`)
+    form.append("reply_to", formData.email)
+
+    const message = `
+Contact Form Submission
+
+Personal Information:
+- Name: ${formData.firstName} ${formData.lastName}
+- Email: ${formData.email}
+- Phone: ${formData.phone || "Not provided"}
+
+Subject: ${formData.subject}
+
+Message:
+${formData.message}
+    `
+
+    form.append("message", message)
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: form,
+      })
+
+      if (!response.ok) {
+        throw new Error("Form submission failed")
+      }
+
+      const result = await response.json()
+      if (result.success) {
+        setSubmitStatus("success")
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        })
+      } else {
+        setSubmitStatus("error")
+      }
+    } catch (error) {
+      console.error("Form submission error:", error)
+      setSubmitStatus("error")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
   return (
     <div className="min-h-screen">
       <Navigation />

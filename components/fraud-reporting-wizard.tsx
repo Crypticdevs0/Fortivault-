@@ -78,29 +78,43 @@ export function FraudReportingWizard() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    const formData = new FormData()
-    formData.append("form-name", "fraud-report")
-    formData.append("fullName", data.fullName)
-    formData.append("scamType", data.scamType)
-    formData.append("amount", data.amount)
-    formData.append("currency", data.currency)
-    formData.append("timeline", data.timeline)
-    formData.append("description", data.description)
-    formData.append("contactEmail", data.contactEmail)
-    formData.append("contactPhone", data.contactPhone)
+    const caseID = `CSRU-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
-    data.transactionHashes.forEach((hash) => {
-      formData.append("transactionHashes[]", hash)
-    })
-    data.bankReferences.forEach((ref) => {
-      formData.append("bankReferences[]", ref)
-    })
-    data.evidenceFiles.forEach((file) => {
-      formData.append("evidenceFiles[]", file as any)
-    })
+    const formData = new FormData()
+    formData.append("access_key", "8b7b966f-b99c-44bd-ae50-fee2a626402f")
+    formData.append("subject", "New Fraud Report Submission - " + caseID)
+    formData.append("from_name", data.fullName)
+    formData.append("reply_to", data.contactEmail)
+
+    const message = `
+Fraud Report Submission
+Case ID: ${caseID}
+
+Personal Information:
+- Full Name: ${data.fullName}
+- Email: ${data.contactEmail}
+- Phone: ${data.contactPhone || "Not provided"}
+
+Incident Details:
+- Scam Type: ${data.scamType}
+- Amount Lost: ${data.amount} ${data.currency}
+- Timeline: ${data.timeline}
+- Description: ${data.description}
+
+Transaction References:
+${data.transactionHashes.length > 0 ? data.transactionHashes.map((h) => `- ${h}`).join("\n") : "None provided"}
+
+Bank References:
+${data.bankReferences.length > 0 ? data.bankReferences.map((r) => `- ${r}`).join("\n") : "None provided"}
+
+Evidence Files Uploaded: ${data.evidenceFiles.length} file(s)
+${data.evidenceFiles.length > 0 ? data.evidenceFiles.map((f) => `- ${f.name}`).join("\n") : ""}
+    `
+
+    formData.append("message", message)
 
     try {
-      const response = await fetch("/.netlify/functions/form", {
+      const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         body: formData,
       })
@@ -110,8 +124,12 @@ export function FraudReportingWizard() {
       }
 
       const result = await response.json()
-      setCaseId(result.caseId || `CSRU-${Math.random().toString(36).substr(2, 9).toUpperCase()}`)
-      setIsSubmitted(true)
+      if (result.success) {
+        setCaseId(caseID)
+        setIsSubmitted(true)
+      } else {
+        throw new Error(result.message || "Submission failed")
+      }
     } catch (error) {
       console.error("Form submission error:", error)
       alert("There was an error submitting your report. Please try again.")
